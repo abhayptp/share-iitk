@@ -4,7 +4,7 @@
 
 \title{Share-IITK(Backend)}
 \author{\href{mailto:abhays@iitk.ac.in}{\textit{Abhay Pratap Singh}}
-		\\
+        \\
         \href{mailto:parv@iitk.ac.in}{\textit{Parv Mor}}}
 \date{June 2017}
 
@@ -13,43 +13,54 @@
 \maketitle
 \section*{Team Members:}
 \begin{itemize}
-	\item Abhay Pratap Singh
+    \item Abhay Pratap Singh
     \item Parv Mor
 \end{itemize}
 \section*{Important Links:}
 \begin{itemize}
-	\item \href{https://github.com/abhayptp/share-iitk}{Share-IITK repo}
+    \item \href{https://github.com/abhayptp/share-iitk}{Share-IITK repo}
 \end{itemize}
 \section*{\textbf{Timeline}}
 \subsection*{1\textsuperscript{st} week:}
 \begin{itemize}
-	 \item Started learning scala from this book \href{https://www.manning.com/books/functional-programming-in-scala}{Functional Programming in Scala}
+     \item Started learning scala from this book \href{https://www.manning.com/books/functional-programming-in-scala}{Functional Programming in Scala}
     \item Jumped to this link \href{https://twitter.github.io/scala_school/}{Twitter Scala School}, as I found it more useful.
     \item Came across \href{http://danielwestheide.com/scala/neophytes.html}{Neophytes Guide to Scala}, studied part - 8 from there, which was about concurrent side of scala.
 \end{itemize}
 
 \subsection*{2\textsuperscript{nd} week:}
 \begin{itemize}
-	\item Learned about sbt build tool.
+    \item Learned about sbt build tool.
     \item Read about the features of REST API.
     \item Decided the endpoints for the API. There will be basically four endpoints:
-    	\begin{itemize}
-    		\item /api/resources/search(GET): It will return the whole table(in JSON) to be searched in the frontend.
+        \begin{itemize}
+            \item /api/resources/search(GET): It will return the whole table(in JSON) to be searched in the frontend.
             \item /api/resources/upload(POST): For uploading the respective file.
             \item /api/resources/(GET): For downloading the file, distinguished by parameter MD5. Also, it will increment the score of that file by 1.
             \item /api/courses/(GET): Return the list of courses.
-     	\end{itemize}
+        \end{itemize}
     \item Learned about Actors in Akka and how they are used for asynchronous calls.
-	\end{itemize}
+    \end{itemize}
 \subsection*{3\textsuperscript{rd} week:}
 \begin{itemize}
-	\item Followed some links to get an idea of akka http REST API, for example:
-    	\begin{itemize}
-        	\item \href{https://spindance.com/reactive-rest-services-akka-http/}{Reactive REST Services using Akka HTTP}
+    \item Followed some links to get an idea of akka http REST API, for example:
+        \begin{itemize}
+            \item \href{https://spindance.com/reactive-rest-services-akka-http/}{Reactive REST Services using Akka HTTP}
             \item \href{https://dzone.com/articles/building-rest-service-scala}{Building a REST Service in Scala with Akka HTTP, Akka Streams and Reactive Mongo - DZone Java}
             \item \href{https://danielasfregola.com/2016/02/07/how-to-build-a-rest-api-with-akka-http/}{How to build a REST API with Akka Http}
-	\end{itemize}
-	\item Wrote the code for handling HttpResponses using akka for \href{https://github.com/abhayptp/share-iitk}{Share IITK} repo.
+    \end{itemize}
+    \item Wrote the code for handling HttpResponses using akka for \href{https://github.com/abhayptp/share-iitk}{Share IITK} repo.
+    \item Started learning Slick, for handling database in scala.
+\end{itemize}
+
+\subsection*{4\textsuperscript{rd} week:}
+\begin{itemize}
+    \item Read initial chapters from the book \href{http://underscore.io/books/essential-slick/}{Essential Slick}.
+    \item Tried understanding code sample from \href{https://github.com/abhayptp/essential-slick-code}{Essential-Slick-Code}
+    \item Understood concept of DSL Routing partially and how it is used to respond to incoming HTTP requests. Implemented DSL routing instead of Function level interface for handling HTTP requests. 
+    \item Started writing code for uploading file using multi-part upload(as I found it more preferable after searching for hours on google).
+    
     
 \end{itemize}
+
 \end{document}
