@@ -1,4 +1,6 @@
-
+import models._
+import DAO.Base._
+import utils.MigrationConfig
 
 import java.io.File
 import java.io.FileOutputStream
@@ -6,6 +8,11 @@ import java.util.UUID
 
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.util.ByteString
+import spray.json.DefaultJsonProtocol
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import spray.json._
+import SprayJsonSupport._
+
 
 import akka.actor.ActorSystem
 //import akka.http.scaladsl.Http._
@@ -23,10 +30,12 @@ import HttpMethods._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.{Await, Future}
 
+trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
+	implicit val resourceFormat = jsonFormat8(Resource)
+}
 
 
-
-object Main extends App {
+object Main extends App with JsonSupport with MigrationConfig {
 	private implicit val system = ActorSystem()
 	protected implicit val executor: ExecutionContext = system.dispatcher
 	//protected val log: LoggingAdapter = Logging(system, getClass)
@@ -44,37 +53,6 @@ object Main extends App {
       	bodyPart.entity.dataBytes.runFold(Array[Byte]())(writeFileOnLocal)
     	}.runFold(0)(_ + _.length)
   	}
-  	/*
-	val asyncHandler: HttpRequest => HttpResponse = {
-		case HttpRequest(GET, Uri.Path("/resources/search"), md5 = HttpEntity , _, _ ) => {
-			//Return the file assosciated with md5 parameter and also increase the score of respective file by 1
-			//Returning only column for now
-        	HttpResponse(status = 201, entity = findFile(md5))
-        	
-		}
-
-		case HttpRequest(POST, Uri.Path("/resources/upload"), res = HttpEntity  , _, _ ) => {
-			
-			
-
-			create(res)
-        	HttpResponse(status = 201)
-        	
-		}
-
-        case HttpRequest(GET, Uri.Path("/resources/"), _ , _, _ ) => {
-
-        	val table = Base.returnWhole()
-			val tableJson = table.map(_.toJson)
-        	HttpResponse(status = 201, entity = tableJson )
-        	
-        }
-
-        case HttpRequest( _, _ , _ , _, _ ) => {
-        	HttpResponse(status = StatusCodes.NotFound)
-        }
-	}
-	*/
 
 	val route = 
 		/* File should be first uploaded to a temporary folder and its md5 should be checked. If it exists, then file 
@@ -83,48 +61,48 @@ object Main extends App {
 		to be implemented. 
 		*/
 
-		path("/resources/upload") {
-			(post & entity(as[Multipart.FormData])) { formData => 
-				//val actualFileName = formData.filename
-				complete {
-					
-					val fileName = UUID.randomUUID().toString
-              		val temp = System.getProperty("java.io.tmpdir")
-               		val filePath = temp + "/" + fileName
-              		processFile(filePath,formData).map { fileSize =>
-              		HttpResponse(StatusCodes.OK, entity = s"File successfully uploaded. Fil size is $fileSize. Path is $filePath")
-              		}.recover {
-               		case ex: Exception => HttpResponse(StatusCodes.InternalServerError, entity = "Error in file uploading")
-               		}
-
+		pathPrefix("resources") {
+			
+			path("upload") {
+				(post & entity(as[Multipart.FormData])) { formData => 
+					//val actualFileName = formData.filename
+					complete {
+						val fileName = UUID.randomUUID().toString
+	              		val temp = System.getProperty("java.io.tmpdir")
+	               		val filePath = temp + "/" + fileName
+	              		processFile(filePath,formData).map { fileSize =>
+	              		HttpResponse(StatusCodes.OK, entity = s"File successfully uploaded. Fil size is $fileSize. Path is $filePath")
+	              		}.recover {
+	               		case ex: Exception => HttpResponse(StatusCodes.InternalServerError, entity = "Error in file uploading")
+	               		}
+					}
 				}
-			}
-		} ~ 
-		path("/resources/upload") {
-			(post ) {
-
-				complete {
-					HttpResponse(StatusCodes.OK)
+			} ~ 
+			path("upload") {
+				(post & entity(as[Resource]) ) { resource =>
+					complete {
+						create(resource)
+						HttpResponse(StatusCodes.OK)
+					}
 				}
-
-			}
-
-		} ~
-		path("/resources/search") {
-			(get ) {
-				complete {
-					HttpResponse(StatusCodes.OK)
+			} ~
+			path("search") {
+				(get)  {
+					print("Request received")
+					complete {
+						
+						returnWhole.map(_.toJson)
+					}
 				}
-			}
-		} ~
-		path("/resources/download") {
-			(get ) {
-				complete {
-					HttpResponse(StatusCodes.OK)
+			} ~
+			path("download") {
+				(get & entity(as[Resource]) ) { resource =>
+					complete {
+						HttpResponse(StatusCodes.OK)
+					}
 				}
 			}
 		}
-
-	Http().bindAndHandle(route, interface = "localhost", port = 0)
+	migrate()
+	Http().bindAndHandle(route, interface = "localhost", port = 8080)
 }
-
