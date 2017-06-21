@@ -81,8 +81,7 @@ object Main extends App with JsonSupport with MigrationConfig {
 			path("upload") {
 				(post & entity(as[Resource]) ) { resource =>
 					complete {
-						create(resource)
-						HttpResponse(StatusCodes.OK)
+						create(resource).map(_.toJson)
 					}
 				}
 			} ~
@@ -90,8 +89,8 @@ object Main extends App with JsonSupport with MigrationConfig {
 				(get)  {
 					print("Request received")
 					complete {
-						
 						returnWhole.map(_.toJson)
+
 					}
 				}
 			} ~
@@ -103,6 +102,6 @@ object Main extends App with JsonSupport with MigrationConfig {
 				}
 			}
 		}
-	migrate()
+	reloadSchema()
 	Http().bindAndHandle(route, interface = "localhost", port = 8080)
 }

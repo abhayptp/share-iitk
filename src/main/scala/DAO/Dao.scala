@@ -36,20 +36,28 @@ object Base extends Dao {
 	val connectionUrl = "jdbc:postgresql://localhost/"
 
 	def returnWhole():  Future[Seq[Resource]] = {
-		(for {
-			resource <- resourceTable.filter(_.id >= 0L )
-		} yield resource).result	
+		val result = (for {
+			resource <- resourceTable.filter(_.Id === 1L  )
+		} yield resource).result
+		session.close
+		db.close
+		result
+
 	}
 
 	def findFile(md_5: String): Future[Resource] = {
-		(for {
-			resource <- resourceTable.filter(_.md5 === md_5)
+		val result = (for {
+			resource <- resourceTable.filter(_.MD5 === md_5)
 		} yield resource).result.head
+		session.close
+		db.close
+		result
 	}
-	def create(resources: Resource) = {
-		resourceTable+=resources
-
+	def create(resources: Resource): Future[Long] = {
+		val result = resourceTable returning resourceTable.map(_.Id)+=resources
+		session.close
+		db.close
+		result
 	}
-	
 
 }

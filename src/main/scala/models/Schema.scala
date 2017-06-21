@@ -14,16 +14,16 @@ import slick.jdbc.PostgresProfile.api._
 		Res_Type: String,
 		Path: String)
 
-	final class ResourceTable(tag: Tag) extends Table[Resource](tag, "resource") {
+	final class ResourceTable(tag: Tag) extends Table[Resource](tag, "resources") {
 
-		def md5			= column[String]("MD5", O.PrimaryKey)
-		def user		= column[String]("User")
-		def course		= column[String]("Course")
-		def year		= column[String]("Year")
-		def sem 		= column[Int]("Sem")
-		def id			= column[Long]("Id", O.AutoInc)
-		def res_Type	= column[String]("Res_Type")
-		def path		= column[String]("Path")
+		def MD5			= column[String]("MD5", O.PrimaryKey)
+		def User		= column[String]("User")
+		def Course		= column[String]("Course")
+		def Year		= column[String]("Year")
+		def Sem 		= column[Int]("Sem")
+		def Id			= column[Long]("Id", O.AutoInc)
+		def Res_Type	= column[String]("Res_Type")
+		def Path		= column[String]("Path")
 
-		def * = (md5, user, course, year, sem, id, res_Type, path).mapTo[Resource]
+		def * = (MD5, User, Course, Year, Sem, Id, Res_Type, Path).mapTo[Resource]
 	}
