@@ -37,13 +37,18 @@ object Base extends Dao {
 
 	def returnWhole():  Future[Seq[Resource]] = {
 		val result = (for {
-			resource <- resourceTable.filter(_.Id === 1L  )
+			resource <- resourceTable.filter(_.Id > 0L  )
 		} yield resource).result
 		session.close
 		db.close
 		result
 
 	}
+
+    def checkIfMD5exists(md5Hash: String): Future[Boolean] = {
+      resourceTable.filter(_.MD5 === md5Hash).exists.result
+    
+    }
 
 	def findFile(md_5: String): Future[Resource] = {
 		val result = (for {
