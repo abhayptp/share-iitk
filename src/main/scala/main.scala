@@ -32,11 +32,10 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext
 import scala.concurrent.{Await, Future}
 
-final case class fileMD5(md5: String)
+
 
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val resourceFormat = jsonFormat8(Resource)
-  implicit val fileMD5Format = jsonFormat1(fileMD5)
 }
 
 

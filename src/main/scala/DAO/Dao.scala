@@ -15,11 +15,11 @@ import slick.driver.PostgresDriver.api._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.{Await, Future}
 
-trait Dao  {
+trait Dao   {
 	val resourceTable = TableQuery[ResourceTable]
-	def db = Database.forConfig("database")
-	implicit val session: Session = db.createSession()
-
+    
+    val db = Database.forConfig("database")
+    implicit val session: Session = db.createSession()
 	protected implicit def executeFromDb[A](action: SqlAction[A, NoStream, _ <: slick.dbio.Effect]): Future[A] = {
     db.run(action)
 	}
@@ -36,36 +36,24 @@ object Base extends Dao {
 	val connectionUrl = "jdbc:postgresql://localhost/"
 
 	def returnWhole():  Future[Seq[Resource]] = {
-		val result = (for {
+		(for {
 			resource <- resourceTable.filter(_.Id > 0L  )
 		} yield resource).result
-		session.close
-		db.close
-		result
 
 	}
 
     def checkIfMD5exists(md5Hash: String): Future[Boolean] = {
-      val result = resourceTable.filter(_.MD5 === md5Hash).exists.result
-      session.close
-      db.close
-      result
+      resourceTable.filter(_.MD5 === md5Hash).exists.result
     
     }
 
 	def findFile(md_5: String): Future[Resource] = {
-		val result = (for {
+		(for {
 			resource <- resourceTable.filter(_.MD5 === md_5)
 		} yield resource).result.head
-		session.close
-		db.close
-		result
 	}
 	def create(resources: Resource): Future[Long] = {
-		val result = resourceTable returning resourceTable.map(_.Id)+=resources
-		session.close
-		db.close
-		result
+		resourceTable returning resourceTable.map(_.Id)+=resources
 	}
 
 }
