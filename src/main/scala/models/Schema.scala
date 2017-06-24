@@ -3,7 +3,6 @@ package models
 import slick.jdbc.PostgresProfile.api._
 //import slick.driver.PostgresDriver.api._
 
-
 	final case class Resource(
 		MD5: String,
 		User: String,

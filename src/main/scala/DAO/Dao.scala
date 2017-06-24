@@ -46,7 +46,10 @@ object Base extends Dao {
 	}
 
     def checkIfMD5exists(md5Hash: String): Future[Boolean] = {
-      resourceTable.filter(_.MD5 === md5Hash).exists.result
+      val result = resourceTable.filter(_.MD5 === md5Hash).exists.result
+      session.close
+      db.close
+      result
     
     }
 
