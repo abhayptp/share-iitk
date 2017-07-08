@@ -17,6 +17,7 @@ resolvers ++= Seq(
 
 
 libraryDependencies ++= Seq(
+    "org.apache.commons" % "commons-io" % "1.3.2",
 	"org.scalatest"      %% "scalatest"            % "2.2.6" % "test",
 	"org.postgresql"      % "postgresql"           % "9.4-1200-jdbc41",
 	"com.typesafe.slick" %% "slick"                % "3.2.0",

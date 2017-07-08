@@ -2,6 +2,7 @@ import models._
 import DAO.Base._
 import utils.MigrationConfig
 
+import org.apache.commons.io._
 import java.util.UUID
 import java.security.{MessageDigest, DigestInputStream}
 import java.io.{File, FileInputStream, FileOutputStream}
@@ -33,9 +34,9 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.{Await, Future}
 
 
-
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val resourceFormat = jsonFormat8(Resource)
+  implicit val coursesFormat = jsonFormat2(Courses)
 }
 
 
@@ -45,10 +46,12 @@ object Main extends App with JsonSupport with MigrationConfig {
   //protected val log: LoggingAdapter = Logging(system, getClass)
   protected implicit val materializer: ActorMaterializer = ActorMaterializer()
 
+  var original = ""; 
 
   def processFile(filePath: String, fileData: Multipart.FormData) = {
     val fileOutput = new FileOutputStream(filePath)
     fileData.parts.mapAsync(1) { bodyPart ⇒
+      original = bodyPart.filename.map(_.toString).getOrElse("")
       def writeFileOnLocal(array: Array[Byte], byteString: ByteString): Array[Byte] = {
         val byteArray: Array[Byte] = byteString.toArray
         fileOutput.write(byteArray)
@@ -73,6 +76,18 @@ object Main extends App with JsonSupport with MigrationConfig {
       fileTemp.delete()
     }
   }
+  def returnCourses(): Seq[Courses] = {
+    val buffer = io.Source.fromFile("/home/aps/share-iitk/src/main/resources/courses.csv")
+    var cols: Seq[String] = Seq.empty[String]
+    var courses: Seq[Courses] = Seq.empty[Courses]
+    for (line <- buffer.getLines) {
+        cols = line.split(",").map(_.trim)
+        courses = courses :+ Courses(cols(0), cols(1))
+    }
+    courses
+  }
+
+
   val route = 
 		/* File should be first uploaded to a temporary folder and its md5 should be checked. If it exists, then file 
 		should be discarded. Otherwise it should be uploaded to main folder with name as md5. And response should be sent 
@@ -81,18 +96,24 @@ object Main extends App with JsonSupport with MigrationConfig {
 		*/
 
 	  pathPrefix("resources") {
-			
+        path("courses") {
+          complete {
+            returnCourses().map(_.toJson)
+          }
+        } ~	
 	    path("upload") {
 		  (post & entity(as[Multipart.FormData])) { formData => 
 			//val actualFileName = formData.filename
 			complete {
+             
 			  val fileName = UUID.randomUUID().toString
 	          val temp = System.getProperty("java.io.tmpdir")
               val fileDir =  "/home/aps/uploadedFiles/"
-	          val filePath = fileDir + fileName
+	          val filePath = fileDir + fileName 
 	          processFile(filePath,formData).map { fileSize =>
                 val md5_hash = computeHash(filePath)
                 val check = checkIfMD5exists(md5_hash)
+                val ext1 = FilenameUtils.getExtension(original)
                 val check1 = Await.result(check, Duration.Inf) 
                 if(check1 == true) {
                
@@ -100,7 +121,7 @@ object Main extends App with JsonSupport with MigrationConfig {
                   HttpResponse(StatusCodes.OK, entity = s"File is already uploaded")
                 }
                 else {
-                  val newPath = "/home/aps/uploadedFiles/MainFiles/" + md5_hash + "/"
+                  val newPath = "/home/aps/uploadedFiles/MainFiles/" + md5_hash + "." + ext1 +"/"
                   var a = new File(filePath).toPath
                   var b = new File(newPath).toPath
                   Files.move(a,b,StandardCopyOption.REPLACE_EXISTING)
