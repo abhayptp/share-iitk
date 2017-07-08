@@ -1,13 +1,20 @@
+import NativePackagerKeys._
+
+//packageArchetype.java_application
+
 name := "share-iitk"
 
 version := "0.1.0"
 
 scalaVersion := "2.11.6"
-/* jerhjy
+
+import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
+enablePlugins(JavaAppPackaging)
+
 resolvers ++= Seq(
   Resolver.bintrayRepo("Typesafe Releases", "https://repo.typesafe.com/typesafe/releases")
   )
-*/
+
 
 libraryDependencies ++= Seq(
 	"org.scalatest"      %% "scalatest"            % "2.2.6" % "test",
@@ -20,5 +27,3 @@ libraryDependencies ++= Seq(
 	"org.flywaydb"		  % "flyway-core" 		   % "4.2.0",
 	"com.typesafe.akka"  %% "akka-actor"           % "2.5.3"
   )
-
-

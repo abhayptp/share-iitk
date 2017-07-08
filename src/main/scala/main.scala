@@ -5,7 +5,7 @@ import utils.MigrationConfig
 import java.util.UUID
 import java.security.{MessageDigest, DigestInputStream}
 import java.io.{File, FileInputStream, FileOutputStream}
-import java.nio.file.{Files, Path, StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.util.ByteString
@@ -95,6 +95,7 @@ object Main extends App with JsonSupport with MigrationConfig {
                 val check = checkIfMD5exists(md5_hash)
                 val check1 = Await.result(check, Duration.Inf) 
                 if(check1 == true) {
+               
                   deleteFile(filePath)
                   HttpResponse(StatusCodes.OK, entity = s"File is already uploaded")
                 }
@@ -133,13 +134,14 @@ object Main extends App with JsonSupport with MigrationConfig {
             parameters('fileMD5) { fileMD5  =>
                   
 			  complete {
-                val file1 = new File("/home/aps/uploadedFiles/MainFiles/"+fileMD5)
-			    HttpEntity(MediaTypes.`application/octet-stream`, file1.length, FileIO.fromFile(file1, chunkSize = 100000))
+                val file1 = "/home/aps/uploadedFiles/MainFiles/"+fileMD5
+			    HttpEntity(MediaTypes.`application/octet-stream`,  FileIO.fromPath(Paths.get(file1), chunkSize = 10000))
+           
               }
             }
 		  }
 	    }
-      }
+      } 
 	reloadSchema()
 	Http().bindAndHandle(route, interface = "localhost", port = 8080)
 }
