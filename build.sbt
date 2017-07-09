@@ -19,7 +19,8 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
     "org.apache.commons" % "commons-io" % "1.3.2",
 	"org.scalatest"      %% "scalatest"            % "2.2.6" % "test",
-	"org.postgresql"      % "postgresql"           % "9.4-1200-jdbc41",
+	"ch.megard" %% "akka-http-cors" % "0.2.1",
+    "org.postgresql"      % "postgresql"           % "9.4-1200-jdbc41",
 	"com.typesafe.slick" %% "slick"                % "3.2.0",
 	"com.typesafe.akka"  %% "akka-http"            % "10.0.8",
 	"com.typesafe.akka"  %% "akka-http-spray-json" % "10.0.8",

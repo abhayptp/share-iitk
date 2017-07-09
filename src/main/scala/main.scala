@@ -1,7 +1,8 @@
 import models._
 import DAO.Base._
-import utils.MigrationConfig
+import utils.{MigrationConfig, CorsSupport}
 
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import org.apache.commons.io._
 import java.util.UUID
 import java.security.{MessageDigest, DigestInputStream}
@@ -41,7 +42,7 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 }
 
 
-object Main extends App with JsonSupport with MigrationConfig {
+object Main extends App with JsonSupport with MigrationConfig  {
   private implicit val system = ActorSystem()
   protected implicit val executor: ExecutionContext = system.dispatcher
   //protected val log: LoggingAdapter = Logging(system, getClass)
@@ -89,7 +90,7 @@ object Main extends App with JsonSupport with MigrationConfig {
   }
 
 
-  val route = 
+  val route = cors() {
 		/* File should be first uploaded to a temporary folder and its md5 should be checked. If it exists, then file 
 		should be discarded. Otherwise it should be uploaded to main folder with name as md5. And response should be sent 
 		to client giving the file name and file path. And then another POST should be handled(giving the meta data). It has 
@@ -164,6 +165,7 @@ object Main extends App with JsonSupport with MigrationConfig {
 		  }
 	    }
       } 
+  }
 	reloadSchema()
 	Http().bindAndHandle(route, interface = "localhost", port = 8080)
 }
