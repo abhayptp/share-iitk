@@ -18,7 +18,7 @@
 \end{itemize}
 \section*{Important Links:}
 \begin{itemize}
-    \item \href{https://github.com/abhayptp/share-iitk}{Share-IITK repo}
+    \item \href{https://github.com/abhayptp/share-iitk}{Share-IITK(Backend) repo}
 \end{itemize}
 \section*{\textbf{Timeline}}
 \subsection*{1\textsuperscript{st} week:}
@@ -41,6 +41,8 @@
         \end{itemize}
     \item Learned about Actors in Akka and how they are used for asynchronous calls.
     \end{itemize}
+    
+    
 \subsection*{3\textsuperscript{rd} week:}
 \begin{itemize}
     \item Followed some links to get an idea of akka http REST API, for example:
@@ -50,17 +52,43 @@
             \item \href{https://danielasfregola.com/2016/02/07/how-to-build-a-rest-api-with-akka-http/}{How to build a REST API with Akka Http}
     \end{itemize}
     \item Wrote the code for handling HttpResponses using akka for \href{https://github.com/abhayptp/share-iitk}{Share IITK} repo.
-    \item Started learning Slick, for handling database in scala.
+    \item Started learning Slick(Scala Language-Integrated Connection Kit), which is Functional Relational Mapping (FRM) library for Scala that makes it easy to work with relational databases
+    \item Decided to use flyway for Database migrations.
 \end{itemize}
 
-\subsection*{4\textsuperscript{rd} week:}
+
+\subsection*{4\textsuperscript{th} week:}
 \begin{itemize}
     \item Read initial chapters from the book \href{http://underscore.io/books/essential-slick/}{Essential Slick}.
     \item Tried understanding code sample from \href{https://github.com/abhayptp/essential-slick-code}{Essential-Slick-Code}
     \item Understood concept of DSL Routing partially and how it is used to respond to incoming HTTP requests. Implemented DSL routing instead of Function level interface for handling HTTP requests. 
     \item Started writing code for uploading file using multi-part upload(as I found it more preferable after searching for hours on google).
     
-    
+\end{itemize}
+
+
+\subsection*{5\textsuperscript{th} week:}
+\begin{itemize}
+    \item Used slick for handling postgres queries.
+    \item Wrote upload(without md5 checking), search endpoint.
+    \item Implemented md5 checking in upload endpoint.
+    \item Added download endpoint.
+\end{itemize}
+
+\subsection*{6\textsuperscript{th} week:}
+\begin{itemize}
+    \item Implemented md5 checking in upload endpoint.
+    \item Endpoints were working fine.
+\end{itemize}
+
+
+\subsection*{7\textsuperscript{th} week:}
+\begin{itemize}
+    \item Scraped list of courses into a csv file from \href{http://iitk.ac.in/new/index.php/uncategorised/1320-list-of-courses}{List of Courses,IIT KAnpur}, using python(Beautiful Soup and requests).
+    \item Made some minor changes in the upload endpoint to save the extension with the file.
+    \item Tried deploying the API on Heroku, but was having some problem in using postgres on Heroku.
+    \item API was not integrated with Frontend as per now.
+
 \end{itemize}
 
 \end{document}
