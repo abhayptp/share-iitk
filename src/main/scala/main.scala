@@ -50,7 +50,7 @@ object Main extends App with JsonSupport with MigrationConfig  {
   //protected val log: LoggingAdapter = Logging(system, getClass)
   protected implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  var original = ""; 
+  var original = "";
 
   def processFile(fileOutput: FileOutputStream, fileData: Multipart.FormData) = {
     fileData.parts.mapAsync(1) { bodyPart ⇒
@@ -83,7 +83,7 @@ object Main extends App with JsonSupport with MigrationConfig  {
   }
   
   def returnCourses(): Seq[Courses] = {
-    val buffer = io.Source.fromFile("/home/aps/share-iitk/src/main/resources/courses.csv")
+    val buffer = io.Source.fromFile("./src/main/resources/courses.csv")
     var cols: Seq[String] = Seq.empty[String]
     var courses: Seq[Courses] = Seq.empty[Courses]
     for (line <- buffer.getLines) {
@@ -114,7 +114,7 @@ object Main extends App with JsonSupport with MigrationConfig  {
               var k = 0
 			  val fileName = UUID.randomUUID().toString
 	          val temp = System.getProperty("java.io.tmpdir")
-              val fileDir =  "/home/aps/uploadedFiles/"
+              val fileDir =  "./uploadedFiles/"
 	          val filePath = fileDir + fileName 
               //val fileSize = Await.result(processFile(filePath, formData),Duration.Inf)
               val fileOutput = new FileOutputStream(filePath)
@@ -131,7 +131,7 @@ object Main extends App with JsonSupport with MigrationConfig  {
                     complete(HttpResponse(StatusCodes.OK, entity = s"File is already uploaded"))
                   }
                   else {
-                    var newPath = "/home/aps/uploadedFiles/MainFiles/" + md5_hash + "." + ext1 +"/"
+                    var newPath = "./uploadedFiles/MainFiles/" + md5_hash + "." + ext1 +"/"
                     var a = new File(filePath).toPath
                     var b = new File(newPath).toPath
                     Files.move(a,b,StandardCopyOption.REPLACE_EXISTING)
@@ -167,7 +167,7 @@ object Main extends App with JsonSupport with MigrationConfig  {
             parameters('fileMD5)  { fileMD5  =>
                   
 			  complete {
-                val file1 = "/home/aps/uploadedFiles/MainFiles/"+fileMD5
+                val file1 = "./uploadedFiles/MainFiles/"+fileMD5
 			    HttpEntity(MediaTypes.`application/octet-stream`,  FileIO.fromPath(Paths.get(file1), chunkSize = 10000))
            
               }
