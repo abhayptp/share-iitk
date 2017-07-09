@@ -2,6 +2,8 @@ import models._
 import DAO.Base._
 import utils.{MigrationConfig, CorsSupport}
 
+import scala.util.{Success, Failure}
+import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import org.apache.commons.io._
 import java.util.UUID
@@ -60,7 +62,7 @@ object Main extends App with JsonSupport with MigrationConfig  {
         array ++ byteArray
       }
       bodyPart.entity.dataBytes.runFold(Array[Byte]())(writeFileOnLocal)
-    }.runFold(0)(_ + _.length)
+    }.runFold(0)(_ + _.length) 
   }
 
   def computeHash(path: String): String = {
@@ -72,12 +74,14 @@ object Main extends App with JsonSupport with MigrationConfig  {
         
     md5.digest.map("%02x".format(_)).mkString
   }
+  
   def deleteFile(path: String) = {
     val fileTemp = new File(path)
     if (fileTemp.exists) {
       fileTemp.delete()
     }
   }
+  
   def returnCourses(): Seq[Courses] = {
     val buffer = io.Source.fromFile("/home/aps/share-iitk/src/main/resources/courses.csv")
     var cols: Seq[String] = Seq.empty[String]
@@ -89,8 +93,7 @@ object Main extends App with JsonSupport with MigrationConfig  {
     courses
   }
 
-
-  val route = cors() {
+  val route = cors() { 
 		/* File should be first uploaded to a temporary folder and its md5 should be checked. If it exists, then file 
 		should be discarded. Otherwise it should be uploaded to main folder with name as md5. And response should be sent 
 		to client giving the file name and file path. And then another POST should be handled(giving the meta data). It has 
@@ -98,46 +101,51 @@ object Main extends App with JsonSupport with MigrationConfig  {
 		*/
 
 	  pathPrefix("resources") {
-        path("courses") {
+        path("courses")  {
           complete {
             returnCourses().map(_.toJson)
           }
         } ~	
 	    path("upload") {
-		  (post & entity(as[Multipart.FormData])) { formData => 
+		  (post & entity(as[Multipart.FormData]))  { formData => 
 			//val actualFileName = formData.filename
-			complete {
-             
+              var newPath = ""
+              var md5_hash =""
+              var k = 0
 			  val fileName = UUID.randomUUID().toString
 	          val temp = System.getProperty("java.io.tmpdir")
               val fileDir =  "/home/aps/uploadedFiles/"
 	          val filePath = fileDir + fileName 
-	          val fileSize = processFile(filePath,formData)
-                val md5_hash = computeHash(filePath)
-                val check = checkIfMD5exists(md5_hash)
-                val ext1 = FilenameUtils.getExtension(original)
-                val check1 = Await.result(check, Duration.Inf) 
-                if(check1 == true) {
+              //val fileSize = Await.result(processFile(filePath, formData),Duration.Inf)
+              onComplete(processFile(filePath, formData))  { 
+                case Success(fileSize) => {
+                  var md5_hash = computeHash(filePath)
+                  val check = checkIfMD5exists(md5_hash)
+                  val ext1 = FilenameUtils.getExtension(original)
+                  val check1 = Await.result(check, Duration.Inf) 
+                  if(check1 == true) {
                
-                  deleteFile(filePath)
-                  HttpResponse(StatusCodes.OK, entity = s"File is already uploaded")
+                    deleteFile(filePath)
+                    complete(HttpResponse(StatusCodes.OK, entity = s"File is already uploaded"))
+                  }
+                  else {
+                    var newPath = "/home/aps/uploadedFiles/MainFiles/" + md5_hash + "." + ext1 +"/"
+                    var a = new File(filePath).toPath
+                    var b = new File(newPath).toPath
+                    Files.move(a,b,StandardCopyOption.REPLACE_EXISTING)
+                    //new File(newPath+fileName,newPath+md5_hash)
+                    //val finalPath = newPath+md5_hash
+                    //HttpResponse(StatusCodes.OK, entity = s"$fileSize $md5_hash")
+                    complete(UploadResponse(newPath, md5_hash).toJson)
                 }
-                else {
-                  val newPath = "/home/aps/uploadedFiles/MainFiles/" + md5_hash + "." + ext1 +"/"
-                  var a = new File(filePath).toPath
-                  var b = new File(newPath).toPath
-                  Files.move(a,b,StandardCopyOption.REPLACE_EXISTING)
-                  //new File(newPath+fileName,newPath+md5_hash)
-                  //val finalPath = newPath+md5_hash
-                  //HttpResponse(StatusCodes.OK, entity = s"File successfully uploaded. File size is $fileSize. Path is $newPath")
-                  UploadResponse(newPath, md5_hash)
-                
-	          }
+                }
+                case Failure(ex) => complete(ex.getMessage)
+             
             }
 		  }
 		} ~ 
 		path("upload") {
-		  (post & entity(as[Resource]) ) { resource =>
+		  (post & entity(as[Resource]) )  { resource =>
 			complete {
 			  create(resource).map(_.toJson)
 			}
@@ -154,7 +162,7 @@ object Main extends App with JsonSupport with MigrationConfig  {
 		} ~
 		path("download") {
           (get ) {
-            parameters('fileMD5) { fileMD5  =>
+            parameters('fileMD5)  { fileMD5  =>
                   
 			  complete {
                 val file1 = "/home/aps/uploadedFiles/MainFiles/"+fileMD5
