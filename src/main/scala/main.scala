@@ -52,8 +52,7 @@ object Main extends App with JsonSupport with MigrationConfig  {
 
   var original = ""; 
 
-  def processFile(filePath: String, fileData: Multipart.FormData) = {
-    val fileOutput = new FileOutputStream(filePath)
+  def processFile(fileOutput: FileOutputStream, fileData: Multipart.FormData) = {
     fileData.parts.mapAsync(1) { bodyPart ⇒
       original = bodyPart.filename.map(_.toString).getOrElse("")
       def writeFileOnLocal(array: Array[Byte], byteString: ByteString): Array[Byte] = {
@@ -63,6 +62,7 @@ object Main extends App with JsonSupport with MigrationConfig  {
       }
       bodyPart.entity.dataBytes.runFold(Array[Byte]())(writeFileOnLocal)
     }.runFold(0)(_ + _.length) 
+
   }
 
   def computeHash(path: String): String = {
@@ -117,8 +117,10 @@ object Main extends App with JsonSupport with MigrationConfig  {
               val fileDir =  "/home/aps/uploadedFiles/"
 	          val filePath = fileDir + fileName 
               //val fileSize = Await.result(processFile(filePath, formData),Duration.Inf)
-              onComplete(processFile(filePath, formData))  { 
+              val fileOutput = new FileOutputStream(filePath)
+              onComplete(processFile(fileOutput, formData))  { 
                 case Success(fileSize) => {
+                  fileOutput.close()
                   var md5_hash = computeHash(filePath)
                   val check = checkIfMD5exists(md5_hash)
                   val ext1 = FilenameUtils.getExtension(original)
