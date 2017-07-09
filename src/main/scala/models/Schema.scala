@@ -3,6 +3,7 @@ package models
 import slick.jdbc.PostgresProfile.api._
 //import slick.driver.PostgresDriver.api._
     final case class Courses(CourseCode: String, CourseName: String)
+    final case class UploadResponse(Path: String, MD5: String)
 
 	final case class Resource(
 		MD5: String,

@@ -37,6 +37,7 @@ import scala.concurrent.{Await, Future}
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val resourceFormat = jsonFormat8(Resource)
   implicit val coursesFormat = jsonFormat2(Courses)
+  implicit val UploadResponseFormat = jsonFormat2(UploadResponse)
 }
 
 
@@ -110,7 +111,7 @@ object Main extends App with JsonSupport with MigrationConfig {
 	          val temp = System.getProperty("java.io.tmpdir")
               val fileDir =  "/home/aps/uploadedFiles/"
 	          val filePath = fileDir + fileName 
-	          processFile(filePath,formData).map { fileSize =>
+	          val fileSize = processFile(filePath,formData)
                 val md5_hash = computeHash(filePath)
                 val check = checkIfMD5exists(md5_hash)
                 val ext1 = FilenameUtils.getExtension(original)
@@ -127,9 +128,9 @@ object Main extends App with JsonSupport with MigrationConfig {
                   Files.move(a,b,StandardCopyOption.REPLACE_EXISTING)
                   //new File(newPath+fileName,newPath+md5_hash)
                   //val finalPath = newPath+md5_hash
-                  HttpResponse(StatusCodes.OK, entity = s"File successfully uploaded. File size is $fileSize. Path is $newPath")
-                        
-                }
+                  //HttpResponse(StatusCodes.OK, entity = s"File successfully uploaded. File size is $fileSize. Path is $newPath")
+                  UploadResponse(newPath, md5_hash)
+                
 	          }
             }
 		  }
