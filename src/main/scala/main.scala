@@ -105,17 +105,16 @@ object Main extends App with JsonSupport with MigrationConfig  {
           complete {
             returnCourses().map(_.toJson)
           }
-        } ~	
-	    path("upload") {
-		  (post & entity(as[Multipart.FormData]))  { formData => 
-			//val actualFileName = formData.filename
+        } ~
+        path("upload") {
+          (post & entity(as[Multipart.FormData]))  { formData => 
               var newPath = ""
               var md5_hash =""
               var k = 0
-			  val fileName = UUID.randomUUID().toString
-	          val temp = System.getProperty("java.io.tmpdir")
+              val fileName = UUID.randomUUID().toString
+              val temp = System.getProperty("java.io.tmpdir")
               val fileDir =  "./uploadedFiles/"
-	          val filePath = fileDir + fileName 
+              val filePath = fileDir + fileName 
               //val fileSize = Await.result(processFile(filePath, formData),Duration.Inf)
               val fileOutput = new FileOutputStream(filePath)
               onComplete(processFile(fileOutput, formData))  { 
@@ -126,7 +125,6 @@ object Main extends App with JsonSupport with MigrationConfig  {
                   val ext1 = FilenameUtils.getExtension(original)
                   val check1 = Await.result(check, Duration.Inf) 
                   if(check1 == true) {
-               
                     deleteFile(filePath)
                     complete(HttpResponse(StatusCodes.OK, entity = s"File is already uploaded"))
                   }
@@ -135,47 +133,40 @@ object Main extends App with JsonSupport with MigrationConfig  {
                     var a = new File(filePath).toPath
                     var b = new File(newPath).toPath
                     Files.move(a,b,StandardCopyOption.REPLACE_EXISTING)
-                    //new File(newPath+fileName,newPath+md5_hash)
-                    //val finalPath = newPath+md5_hash
-                    //HttpResponse(StatusCodes.OK, entity = s"$fileSize $md5_hash")
                     complete(UploadResponse(newPath, md5_hash).toJson)
-                }
+                  }
                 }
                 case Failure(ex) => complete(ex.getMessage)
-             
-            }
-		  }
+              }
+          }
 		} ~ 
 		path("upload") {
 		  (post & entity(as[Resource]) )  { resource =>
 			complete {
 			  create(resource).map(_.toJson)
 			}
-		  }
+          }
         } ~
-		path("search") {
-		  (get)  {
-			print("Request received")
-			complete {
-			  returnWhole.map(_.toJson)
-
-			}
-		  }
-		} ~
-		path("download") {
-          (get ) {
-            parameters('fileMD5)  { fileMD5  =>
-                  
-			  complete {
+        path("search") {
+          (get)  {
+            print("Request received")
+            complete {
+              returnWhole.map(_.toJson)
+            }
+          }
+        } ~
+        path("download") {
+          (get) {
+            parameters('fileMD5)  { fileMD5  =>      
+              complete {
                 val file1 = "./uploadedFiles/MainFiles/"+fileMD5
-			    HttpEntity(MediaTypes.`application/octet-stream`,  FileIO.fromPath(Paths.get(file1), chunkSize = 10000))
-           
+                HttpEntity(MediaTypes.`application/octet-stream`,  FileIO.fromPath(Paths.get(file1), chunkSize = 10000))
               }
             }
-		  }
-	    }
-      } 
+          }
+        }
+      }
   }
-	reloadSchema()
-	Http().bindAndHandle(route, interface = "localhost", port = 8080)
+  reloadSchema()
+  Http().bindAndHandle(route, interface = "localhost", port = 8082)
 }
